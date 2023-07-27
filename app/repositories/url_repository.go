@@ -24,3 +24,8 @@ func (r *URLRepository) Find(shortURL string) (*entities.URL, bool) {
     url, found := r.urls[shortURL]
     return url, found
 }
+
+// count
+func (r *URLRepository) Count() int {
+    return len(r.urls)
+}

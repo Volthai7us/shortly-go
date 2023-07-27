@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"shortly/app/services"
 	"strings"
@@ -23,7 +24,15 @@ func (c *URLController) Index(w http.ResponseWriter, r *http.Request) {
 
 // create a new short url
 func (c *URLController) Create(w http.ResponseWriter, r *http.Request) {
-	//TODO: implement
+	url := r.URL.Query().Get("url")
+	if url == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	shortURL := c.service.Shorten(url)
+	w.Write([]byte(shortURL))
+
+	fmt.Println(c.service.NumberOfURLs())
 }
 
 // redirect to the original url
@@ -35,7 +44,16 @@ func (c *URLController) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		path := parts[len(parts)-1]
-		http.Redirect(w, r, "https://www.google.com/search?q="+path, http.StatusFound)
+		originalURL := c.service.Find(path)
+		fmt.Println(originalURL)
+		if originalURL != "" {
+			if !strings.HasPrefix(originalURL, "http") {
+				originalURL = "http://" + originalURL
+			}
+
+			http.Redirect(w, r, originalURL, http.StatusFound)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
 	}
-	//TODO: implement
 }
