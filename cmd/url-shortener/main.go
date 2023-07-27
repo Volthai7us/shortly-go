@@ -13,6 +13,8 @@ func main() {
 	urlController := controllers.NewURLController(urlService)
 
 	http.HandleFunc("/hello", urlController.Index)
+	http.HandleFunc("/create", urlController.Create)
+	http.HandleFunc("/", urlController.Redirect)
 
 	http.ListenAndServe(":5173", nil)
 }
