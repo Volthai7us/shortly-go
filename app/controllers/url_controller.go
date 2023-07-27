@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"shortly/app/services"
 	"strings"
@@ -30,7 +30,24 @@ func (c *URLController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	shortURL, _ := c.service.Shorten(url)
-	w.Write([]byte(shortURL))
+
+	response := map[string]interface{}{
+		"short_id":    shortURL,
+		"short_url":   "http://" + r.Host + "/" + shortURL,
+		"original_url": url,
+		"status":       "success",
+	}
+
+	// Convert the response to JSON format
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set the content type and write the response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
 }
 
 // redirect to the original url
@@ -43,7 +60,7 @@ func (c *URLController) Redirect(w http.ResponseWriter, r *http.Request) {
 	} else {
 		path := parts[len(parts)-1]
 		originalURL, err := c.service.Find(path)
-		fmt.Println(originalURL)
+
 		if err == nil {
 			if !strings.HasPrefix(originalURL, "http") {
 				originalURL = "http://" + originalURL

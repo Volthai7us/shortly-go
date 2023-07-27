@@ -25,7 +25,7 @@ func (s *URLShortenerService) Shorten(originalURL string) (string, error) {
 	}
 
 	shortURL := s.generateShortURL(originalURL)
-	fmt.Println("shortURL: ", shortURL)
+
 	url_struct := entities.NewURL(originalURL, shortURL)
 	s.urlRepository.Store(url_struct)
 
