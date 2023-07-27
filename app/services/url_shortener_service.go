@@ -47,5 +47,5 @@ func (s *URLShortenerService) NumberOfURLs() int {
 func (s *URLShortenerService) generateShortURL(originalURL string) string {
 	randomString := sha256.Sum256([]byte(originalURL))
 	hexString := fmt.Sprintf("%x", randomString)
-	return hexString[0:8]
+	return hexString[0:10]
 }

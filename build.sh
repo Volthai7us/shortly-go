@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker build -t volthai7us/url-shortener:latest .
+docker build --no-cache -t volthai7us/url-shortener:latest .
 
 docker push volthai7us/url-shortener:latest
 
