@@ -9,4 +9,3 @@ spec:
       targetPort: 5173
   selector:
     app: url-shortener
-  sessionAffinity: ClientIP

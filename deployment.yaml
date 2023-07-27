@@ -17,3 +17,10 @@ spec:
           image: volthai7us/url-shortener:latest
           ports:
             - containerPort: 5173
+          volumeMounts:
+            - name: url-volume
+              mountPath: /data
+      volumes:
+        - name: url-volume
+          persistentVolumeClaim:
+            claimName: url-pv-claim

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"log"
 	"shortly/app/repositories"
 	"shortly/app/services"
 	"testing"
@@ -8,8 +9,12 @@ import (
 
 func TestShorten(t *testing.T) {
 	// Setup
-	repo := repositories.NewURLRepository()
-	service := services.NewURLShortenerService(repo)
+	urlRepository, err := repositories.NewURLRepository("")
+	if err != nil {
+		log.Fatalf("Failed to create URL repository: %v", err)
+	}
+	
+	service := services.NewURLShortenerService(urlRepository)
 
 	originalURL := "https://www.test.com"
 	shortURL, err := service.Shorten(originalURL)
@@ -23,7 +28,7 @@ func TestShorten(t *testing.T) {
 	}
 
 	// Assert that the URL was stored correctly
-	url, found := repo.Find(shortURL)
+	url, found := urlRepository.Find(shortURL)
 	if !found {
 		t.Errorf("URL %s was not stored correctly", shortURL)
 	}
@@ -44,7 +49,7 @@ func TestShorten(t *testing.T) {
 	}
 
 	// Assert that the second URL was stored correctly
-	url, found = repo.Find(anotherShortURL)
+	url, found = urlRepository.Find(anotherShortURL)
 	if !found {
 		t.Errorf("URL %s was not stored correctly", anotherShortURL)
 	}
@@ -56,8 +61,8 @@ func TestShorten(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	// Setup
-	repo := repositories.NewURLRepository()
-	service := services.NewURLShortenerService(repo)
+	urlRepository, _ := repositories.NewURLRepository("")
+	service := services.NewURLShortenerService(urlRepository)
 
 	originalURL := "https://www.test.com"
 	shortURL, _ := service.Shorten(originalURL)
@@ -81,8 +86,8 @@ func TestFind(t *testing.T) {
 
 func TestNumberOfURLs(t *testing.T) {
 	// Setup
-	repo := repositories.NewURLRepository()
-	service := services.NewURLShortenerService(repo)
+	urlRepository, _ := repositories.NewURLRepository("")
+	service := services.NewURLShortenerService(urlRepository)
 
 	// Test number of URLs when the repository is empty
 	num := service.NumberOfURLs()

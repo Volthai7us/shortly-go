@@ -72,3 +72,23 @@ func (c *URLController) Redirect(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+func (c *URLController) Urls(w http.ResponseWriter, r *http.Request) {
+	numberOfURLs := c.service.NumberOfURLs()
+	urls := c.service.Urls()
+	response := map[string]interface{}{
+		"number_of_urls": numberOfURLs,
+		"urls":           urls,
+	}
+
+	// Convert the response to JSON format
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set the content type and write the response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
+}
