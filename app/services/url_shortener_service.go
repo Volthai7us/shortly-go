@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"shortly/app/entities"
 	"shortly/app/repositories"
 )
@@ -15,25 +16,25 @@ func NewURLShortenerService(urlRepository *repositories.URLRepository) *URLShort
 	}
 }
 
-func (s *URLShortenerService) Shorten(originalURL string) string {
+func (s *URLShortenerService) Shorten(originalURL string) (string, error) {
 	url, found := s.urlRepository.Find(originalURL)
 	if found {
-		return url.ShortURL
+		return url.ShortURL, errors.New("URL already exists")
 	}
 
 	shortURL := s.generateShortURL(originalURL)
 	url_struct := entities.NewURL(originalURL, shortURL)
 	s.urlRepository.Store(url_struct)
 
-	return shortURL
+	return shortURL, nil
 }
 
-func (s *URLShortenerService) Find(shortURL string) string {
+func (s *URLShortenerService) Find(shortURL string) (string, error) {
 	url, found := s.urlRepository.Find(shortURL)
 	if found {
-		return url.OriginalURL
+		return url.OriginalURL, nil
 	}
-	return ""
+	return "", errors.New("URL not found")
 }
 
 func (s *URLShortenerService) NumberOfURLs() int {

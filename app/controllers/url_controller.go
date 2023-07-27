@@ -29,7 +29,7 @@ func (c *URLController) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	shortURL := c.service.Shorten(url)
+	shortURL, _ := c.service.Shorten(url)
 	w.Write([]byte(shortURL))
 
 	fmt.Println(c.service.NumberOfURLs())
@@ -44,9 +44,9 @@ func (c *URLController) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		path := parts[len(parts)-1]
-		originalURL := c.service.Find(path)
+		originalURL, err := c.service.Find(path)
 		fmt.Println(originalURL)
-		if originalURL != "" {
+		if err == nil {
 			if !strings.HasPrefix(originalURL, "http") {
 				originalURL = "http://" + originalURL
 			}
