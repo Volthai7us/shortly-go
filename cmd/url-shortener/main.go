@@ -16,5 +16,6 @@ func main() {
 	http.HandleFunc("/create", urlController.Create)
 	http.HandleFunc("/", urlController.Redirect)
 
-	http.ListenAndServe(":8080", nil)
+
+	http.ListenAndServe(":5173", nil)
 }

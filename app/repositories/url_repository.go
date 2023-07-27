@@ -25,6 +25,16 @@ func (r *URLRepository) Find(shortURL string) (*entities.URL, bool) {
     return url, found
 }
 
+// find by original url
+func (r *URLRepository) FindByOriginalURL(originalURL string) (*entities.URL, bool) {
+    for _, url := range r.urls {
+        if url.GetOriginalURL() == originalURL {
+            return url, true
+        }
+    }
+    return nil, false
+}
+
 // count
 func (r *URLRepository) Count() int {
     return len(r.urls)

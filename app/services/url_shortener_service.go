@@ -1,7 +1,9 @@
 package services
 
 import (
+	"crypto/sha256"
 	"errors"
+	"fmt"
 	"shortly/app/entities"
 	"shortly/app/repositories"
 )
@@ -17,12 +19,13 @@ func NewURLShortenerService(urlRepository *repositories.URLRepository) *URLShort
 }
 
 func (s *URLShortenerService) Shorten(originalURL string) (string, error) {
-	url, found := s.urlRepository.Find(originalURL)
+	url, found := s.urlRepository.FindByOriginalURL(originalURL)
 	if found {
-		return url.ShortURL, errors.New("URL already exists")
+		return url.GetShortURL(), nil
 	}
 
 	shortURL := s.generateShortURL(originalURL)
+	fmt.Println("shortURL: ", shortURL)
 	url_struct := entities.NewURL(originalURL, shortURL)
 	s.urlRepository.Store(url_struct)
 
@@ -42,5 +45,7 @@ func (s *URLShortenerService) NumberOfURLs() int {
 }
 
 func (s *URLShortenerService) generateShortURL(originalURL string) string {
-	return originalURL[0:6]
+	randomString := sha256.Sum256([]byte(originalURL))
+	hexString := fmt.Sprintf("%x", randomString)
+	return hexString[0:8]
 }

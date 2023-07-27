@@ -25,14 +25,12 @@ func (c *URLController) Index(w http.ResponseWriter, r *http.Request) {
 // create a new short url
 func (c *URLController) Create(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("url")
-	if url == "" {
+	if len(url) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	shortURL, _ := c.service.Shorten(url)
 	w.Write([]byte(shortURL))
-
-	fmt.Println(c.service.NumberOfURLs())
 }
 
 // redirect to the original url
