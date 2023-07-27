@@ -1,18 +1,31 @@
+# Start from golang base image
 FROM golang:1.17-alpine as builder
 
+# Set the current Working Directory inside the container
 WORKDIR /app
 
+# Copy go.mod and download dependencies
 COPY go.mod ./
-COPY go.sum ./
 RUN go mod download
 
-COPY . ./
+# Copy everything from the current directory to the Working Directory inside the container
+COPY . .
 
-RUN go build -o main .
+# Build the application
+RUN go build -o main ./cmd/url-shortener
 
+# Start a new stage from scratch
 FROM alpine:latest
-COPY --from=builder /app/main /app/main
 
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copy the binary file from builder
+COPY --from=builder /app/main .
+
+# Expose port 5173 to the outside
 EXPOSE 5173
 
-CMD ["/cmd/url-shortener"]
+# Run the executable
+CMD ["./main"]
