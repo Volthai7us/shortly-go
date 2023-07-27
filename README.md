@@ -2,6 +2,8 @@
 
 URL Shortener, gelen uzun URL'leri kısa URL'lere dönüştürmek için bir Go uygulamasıdır. Bu uygulama DDD (Domain Driven Design) prensiplerine göre oluşturulmuştur ve Kubernetes üzerinden servis edilebilir.
 
+(https://www.youtube.com/watch?v=650VEfIOD1s)
+
 ---
 
 ## Yapı
@@ -27,12 +29,6 @@ Bu projenin yapılanması aşağıdaki gibi organize edilmiştir:
   /test
     url_shortener_test.go
   /Dockerfile
-  /deployment.yaml
-  /service.yaml
-  /run.sh
-  /build.sh
-  /README.md
-  /go.mod
 ```
 
 ---
@@ -46,9 +42,11 @@ Bu uygulama, bir HTTP POST isteği yoluyla alınan herhangi bir URL'yi kısaltı
 3. `url_shortener_service`, URL'yi önce `url_repository`'de arar. Eğer URL daha önce kısaltılmışsa, var olan kısa URL döndürülür. Eğer URL daha önce kısaltılmamışsa, yeni bir kısa URL oluşturulur ve bu URL `url_repository`'e kaydedilir.
 4. Oluşturulan kısa URL, HTTP yanıtında kullanıcıya geri gönderilir.
 5. Kullanıcı, `/` endpoint'ine kısa URL'yi göndererek orijinal URL'ye yönlendirilir.
+6. SHA256 algoritması kullanılarak oluşturulan kısa URL, 10 karakter uzunluğundadır.
 
-- Kubernetes replikaları arasında tutarlılık sağlamak için, sessionAffinity ClientIP olarak ayarlanmıştır.
-- Bu sayede, IP adresinden gelen isteklerde aynı pod'a yönlendirilir.
+- Kubernetes replikaları arasında tutarlılık sağlamak için, PersistentVolume ve PersistentVolumeClaim kullanılmıştır.
+- Bu sayede, uygulama herhangi bir Kubernetes pod'undan kaldırılsa bile, veriler kaybolmaz.
+- Ve uygulama tekrar başlatıldığında, veriler PersistentVolume'dan geri yüklenir.
 
 ---
 
@@ -61,12 +59,14 @@ Bu projeyi çalıştırmak için aşağıdaki adımları takip edebilirsiniz:
    git clone https://github.com/yourusername/url-shortener.git
    cd url-shortener
    ```
-2. Uygulamayı build edin ve çalıştırın:
+2. Docker image'ini build edin ve Docker Hub'a push edin ve Kubernetes yaml dosyalarını apply edin:
    ```bash
-   go build ./cmd/url-shortener
-   ./url-shortener
+   ./build.sh
    ```
-3. Artık uygulama `http://localhost:5173` adresinde çalışıyor olmalıdır.
+3. Uygulamayı Kubernetes üzerinde çalıştırın:
+   ```bash
+    ./run.sh
+   ```
 
 ---
 
@@ -77,35 +77,3 @@ Projenin testlerini çalıştırmak için aşağıdaki komutu kullanabilirsiniz:
 ```bash
 go test test/url_shortener_service_test.go
 ```
-
----
-
-## Docker
-
-Bu projeyi Docker üzerinde çalıştırmak için, aşağıdaki komutları kullanabilirsiniz:
-
-1. Docker image'ini build edin:
-   ```bash
-   docker build -t url-shortener .
-   ```
-2. Docker container'ı başlatın:
-   ```bash
-   docker run -p 5173:5173 url-shortener
-   ```
-
----
-
-## Kubernetes
-
-Bu projeyi Kubernetes üzerinde çalıştırmak için, aşağıdaki komutları kullanabilirsiniz:
-
-1. Docker image'ini build edin ve Docker Hub'a push edin:
-   ```bash
-   docker build -t yourusername/url-shortener .
-   docker push yourusername/url-shortener
-   ```
-2. Kubernetes deployment ve service'ini apply edin:
-   ```bash
-   kubectl apply -f deployment.yaml
-   kubectl apply -f service.yaml
-   ```
