@@ -1,21 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"shortly/app/entities"
+	"net/http"
+	"shortly/app/controllers"
 	"shortly/app/repositories"
+	"shortly/app/services"
 )
 
 func main() {
 	urlRepository := repositories.NewURLRepository()
+	urlService := services.NewURLShortenerService(urlRepository)
+	urlController := controllers.NewURLController(urlService)
 
-	url := entities.NewURL("https://www.google.com", "abc")
-	urlRepository.Store(url)
+	http.HandleFunc("/hello", urlController.Index)
 
-	url, found := urlRepository.Find("abc")
-	if found {
-		fmt.Printf("URL: %s\n", url.GetOriginalURL())
-	} else {
-		fmt.Println("URL not found")
-	}
+	http.ListenAndServe(":5173", nil)
 }
